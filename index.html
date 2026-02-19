@@ -1,0 +1,145 @@
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Shivaji Design Agency</title>
+    <meta name="description" content="Personal Portfolio & Agency Template" />
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link href="https://api.fontshare.com/v2/css?f[]=clash-display@400,500,600,700&display=swap" rel="stylesheet">
+
+    <!-- Tailwind -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              background: '#050505',
+              surface: '#18181b',
+              primary: '#ffffff',
+              secondary: '#a1a1aa',
+              accent: '#CC2929',
+              'accent-dark': '#A61E1E',
+              link: '#38bdf8',
+              success: '#4ade80',
+              border: '#27272a'
+            },
+            fontFamily: {
+              sans: ['Inter', 'sans-serif'],
+              display: ['Clash Display', 'sans-serif'],
+            },
+            backgroundImage: {
+              'grid-pattern': "url('https://framerusercontent.com/images/zvhaXqRGIighZueOuPlMK0Gwr84.svg')",
+            },
+            animation: {
+              'reveal': 'reveal 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards',
+              'float': 'float 6s ease-in-out infinite',
+            },
+            keyframes: {
+              reveal: {
+                '0%': { opacity: '0', transform: 'translateY(30px)' },
+                '100%': { opacity: '1', transform: 'translateY(0)' }
+              },
+              float: {
+                '0%, 100%': { transform: 'translateY(0)' },
+                '50%': { transform: 'translateY(-15px)' }
+              }
+            }
+          }
+        }
+      }
+    </script>
+    <style>
+      html {
+        scroll-behavior: smooth;
+      }
+      body {
+        background-color: #050505;
+        color: #ffffff;
+        overflow-x: hidden;
+      }
+      /* Custom Scrollbar */
+      ::-webkit-scrollbar {
+        width: 8px;
+      }
+      ::-webkit-scrollbar-track {
+        background: #18181b; 
+      }
+      ::-webkit-scrollbar-thumb {
+        background: #3f3f46; 
+        border-radius: 4px;
+      }
+      ::-webkit-scrollbar-thumb:hover {
+        background: #52525b; 
+      }
+      
+      .ticker-wrap {
+        overflow: hidden;
+        white-space: nowrap;
+      }
+      .ticker {
+        display: inline-block;
+        animation: ticker 30s linear infinite;
+      }
+      @keyframes ticker {
+        0% { transform: translate3d(0, 0, 0); }
+        100% { transform: translate3d(-50%, 0, 0); }
+      }
+      .text-outline {
+         -webkit-text-stroke: 1px rgba(255,255,255,0.15);
+         color: transparent;
+      }
+
+      /* Neon Animation Keyframes */
+      @keyframes neon-pulse {
+        0% {
+          text-shadow: 0 0 0px rgba(255, 255, 255, 0);
+        }
+        100% {
+          text-shadow: 0 0 15px rgba(255, 255, 255, 0.3), 0 0 30px rgba(204, 41, 41, 0.4);
+        }
+      }
+      .neon-text {
+        animation: neon-pulse 4s ease-in-out infinite alternate;
+      }
+
+      @keyframes neon-stroke-pulse {
+        0% {
+          filter: drop-shadow(0 0 0px rgba(204, 41, 41, 0));
+        }
+        100% {
+          filter: drop-shadow(0 0 5px rgba(204, 41, 41, 0.5)) drop-shadow(0 0 15px rgba(204, 41, 41, 0.2));
+        }
+      }
+      .neon-outline-text {
+        animation: neon-stroke-pulse 4s ease-in-out infinite alternate;
+        animation-delay: 1s; /* Slight offset for wave effect */
+      }
+
+      #mouse-splash {
+        transition: background 0.1s ease-out;
+      }
+    </style>
+  <script type="importmap">
+{
+  "imports": {
+    "react/": "https://esm.sh/react@^19.2.3/",
+    "react": "https://esm.sh/react@^19.2.3",
+    "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
+    "lucide-react": "https://esm.sh/lucide-react@^0.563.0"
+  }
+}
+</script>
+<link rel="stylesheet" href="/index.css">
+</head>
+  <body>
+    <div id="root"></div>
+  <script type="module" src="/index.tsx"></script>
+</body>
+</html>
