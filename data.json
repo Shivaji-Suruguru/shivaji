@@ -1,0 +1,16 @@
+{
+  "projects": [
+    { "id": "1", "name": "EQUI – Expense Tracker App", "category": "UI/UX DESIGN", "tags": ["Finance", "Mobile", "Figma"], "img": "https://framerusercontent.com/images/EkAvM1ahgBSVfpWLLzVr0CQQHpU.png", "description": "Designed end-to-end UI/UX for a finance app with screens for Home, Login, Budget, Analytics, and Settings.", "date": "Nov 2024", "featured": true },
+    { "id": "2", "name": "UI/UX Redesign for E-commerce", "category": "UI/UX DESIGN", "tags": ["Web", "Retail", "Animation"], "img": "https://framerusercontent.com/images/yYbXHJTjYl7oxY1TYtArDlr3es.png", "description": "Improved navigation and interaction for an e-commerce platform through a modern mobile-first redesign.", "date": "Jul 2024", "featured": true },
+    { "id": "3", "name": "PORTFOLIO 2026", "category": "FRONTEND", "tags": ["React", "Tailwind", "GSAP"], "img": "https://framerusercontent.com/images/uv0QGWBUjawPLGUzoVSulQaJ7E.png", "description": "Personal portfolio website featuring advanced animations and dark mode aesthetics.", "date": "Feb 2026", "featured": true },
+    { "id": "4", "name": "AI DASHBOARD", "category": "DASHBOARD", "tags": ["AI", "Data", "SaaS"], "img": "https://images.unsplash.com/photo-1551288049-bbda38a5f452?q=80&w=2070&auto=format&fit=crop", "description": "Data visualization dashboard for an AI monitoring tool.", "date": "Jan 2025", "featured": true },
+    { "id": "5", "name": "CRYPTO WALLET", "category": "UI/UX DESIGN", "tags": ["Crypto", "Wallet", "Security"], "img": "https://images.unsplash.com/photo-1621416848440-236914c244a5?q=80&w=1974&auto=format&fit=crop", "description": "Minimalist mobile wallet for managing digital assets.", "date": "Dec 2024", "featured": true }
+  ],
+  "services": [
+    { "id": "1", "title": "BRANDING", "tags": ["Logo Design", "Graphic", "Strategy"] },
+    { "id": "2", "title": "UI/UX", "tags": ["Web & App Design", "UX Research", "Design Systems"] },
+    { "id": "3", "title": "FRAMER", "tags": ["Web Development", "No-Code", "Fast Delivery"] },
+    { "id": "4", "title": "AI CREATIVE ARTIST", "tags": ["Generative Art", "Neural Styling", "Custom Prompts"] }
+  ],
+  "skills": ["Figma", "React", "Tailwind", "GSAP", "Framer", "Wireframing", "User Research", "Typography", "HTML", "Git"]
+}
