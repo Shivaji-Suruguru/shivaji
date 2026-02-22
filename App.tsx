@@ -1,6 +1,7 @@
 
 import React, { useEffect, useState, useRef } from 'react';
-import { Menu, X, ArrowRight, Github, Linkedin, Mail, Plus, Trash2, Globe, Check, Lock, Briefcase, GraduationCap, Zap } from 'lucide-react';
+import { Menu, X, ArrowRight, Github, Linkedin, Mail, Plus, Trash2, Globe, Check, Lock, Briefcase, GraduationCap, Zap, CloudUpload, Loader2 } from 'lucide-react';
+import portfolioData from './data.json';
 
 // --- Types ---
 interface Project {
@@ -92,6 +93,79 @@ const AdminDashboard = ({ projects, services, skills, setProjects, setServices, 
     }
   };
 
+  const [isPushing, setIsPushing] = useState(false);
+  const [pushStatus, setPushStatus] = useState('');
+
+  // --- Auto-Sync Logic ---
+  useEffect(() => {
+    if (!isAuthorized) return;
+
+    const timeoutId = setTimeout(() => {
+      pushToGithub();
+    }, 3000); // Sync after 3 seconds of inactivity
+
+    return () => clearTimeout(timeoutId);
+  }, [projects, services, skills, isAuthorized]);
+
+  const pushToGithub = async (updatedProjects?: Project[], updatedServices?: Service[], updatedSkills?: string[]) => {
+    setIsPushing(true);
+    setPushStatus('Syncing with GitHub...');
+
+    try {
+      const token = import.meta.env.VITE_GITHUB_TOKEN;
+      const repo = import.meta.env.VITE_GITHUB_REPO;
+      const branch = import.meta.env.VITE_GITHUB_BRANCH || 'main';
+      const path = 'data.json';
+
+      if (!token || token === 'your_token_here') {
+        throw new Error('GitHub Token not configured in .env file');
+      }
+
+      // 1. Get current SHA
+      const getRes = await fetch(`https://api.github.com/repos/${repo}/contents/${path}?ref=${branch}`, {
+        headers: { 'Authorization': `token ${token}` }
+      });
+
+      let sha = '';
+      if (getRes.ok) {
+        const data = await getRes.json();
+        sha = data.sha;
+      }
+
+      // 2. Prepare Data
+      const updatedData = {
+        projects: updatedProjects || projects,
+        services: updatedServices || services,
+        skills: updatedSkills || skills
+      };
+
+      // 3. Update GitHub
+      const putRes = await fetch(`https://api.github.com/repos/${repo}/contents/${path}`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `token ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          message: `Auto-sync: Portfolio update [${new Date().toLocaleString()}]`,
+          content: btoa(unescape(encodeURIComponent(JSON.stringify(updatedData, null, 2)))),
+          sha: sha || undefined,
+          branch: branch
+        })
+      });
+
+      if (!putRes.ok) throw new Error('Failed to update GitHub');
+
+      setPushStatus('Synced!');
+      setTimeout(() => setPushStatus(''), 2000);
+    } catch (err: any) {
+      setPushStatus(`Sync Error`);
+      console.error(err);
+    } finally {
+      setIsPushing(false);
+    }
+  };
+
   if (!isAuthorized) {
     return (
       <div className="fixed inset-0 bg-background z-[2000] flex items-center justify-center p-6">
@@ -118,14 +192,29 @@ const AdminDashboard = ({ projects, services, skills, setProjects, setServices, 
   }
 
   const handleUpdateProject = (id: string, updates: Partial<Project>) => {
-    setProjects(projects.map((p: Project) => p.id === id ? { ...p, ...updates } : p));
+    setProjects((prev: Project[]) => prev.map((p: Project) => p.id === id ? { ...p, ...updates } : p));
+  };
+
+  const handleAddProject = () => {
+    const newProject = { id: Date.now().toString(), name: "Untitled Project", category: "WEB DESIGN", tags: ["Concept"], img: "", description: "", date: "2026", featured: true };
+    setProjects((prev: Project[]) => [newProject, ...prev]);
+  };
+
+  const handleDeleteProject = (id: string) => {
+    setProjects((prev: Project[]) => prev.filter((p: Project) => p.id !== id));
   };
 
   return (
     <div className="fixed inset-0 bg-background z-[1000] overflow-y-auto p-6 md:p-12 font-sans selection:bg-white selection:text-black">
       <div className="max-w-4xl mx-auto">
         <div className="flex justify-between items-center mb-12 border-b border-white/10 pb-6">
-          <h1 className="text-2xl font-display font-bold uppercase">Admin Dashboard</h1>
+          <div className="flex items-center gap-6">
+            <h1 className="text-2xl font-display font-bold uppercase">Admin Dashboard</h1>
+            <div className={`flex items-center gap-2 px-6 py-2 rounded-full font-bold text-[10px] uppercase tracking-[0.2em] transition-all bg-white/5`}>
+              {isPushing ? <Loader2 size={14} className="animate-spin text-accent" /> : <CloudUpload size={14} className="text-white/40" />}
+              <span className={pushStatus.includes('Error') ? 'text-red-500' : 'text-white/40'}>{pushStatus || 'GitHub Auto-Sync'}</span>
+            </div>
+          </div>
           <button onClick={onClose} className="border border-white/20 px-6 py-2 rounded-full font-bold text-[10px] uppercase tracking-[0.2em] hover:bg-white hover:text-black transition-colors">Exit Dashboard</button>
         </div>
 
@@ -137,7 +226,7 @@ const AdminDashboard = ({ projects, services, skills, setProjects, setServices, 
 
         {tab === 'projects' ? (
           <div className="space-y-6">
-            <button onClick={() => setProjects([{ id: Date.now().toString(), name: "Untitled Project", category: "WEB DESIGN", tags: ["Concept"], img: "", description: "", date: "2026", featured: true }, ...projects])} className="w-full py-4 border border-dashed border-white/10 rounded-xl flex items-center justify-center gap-2 text-secondary hover:text-white hover:border-white transition-all text-[10px] font-bold tracking-widest uppercase"><Plus size={14} /> Add New Project</button>
+            <button onClick={handleAddProject} className="w-full py-4 border border-dashed border-white/10 rounded-xl flex items-center justify-center gap-2 text-secondary hover:text-white hover:border-white transition-all text-[10px] font-bold tracking-widest uppercase"><Plus size={14} /> Add New Project</button>
             <div className="grid grid-cols-1 gap-4 pb-20">
               {projects.map((p: Project) => (
                 <div key={p.id} className="bg-surface/50 p-6 rounded-xl border border-white/5 space-y-4">
@@ -145,13 +234,30 @@ const AdminDashboard = ({ projects, services, skills, setProjects, setServices, 
                     <button onClick={() => handleUpdateProject(p.id, { featured: !p.featured })} className={`flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-full border transition-all ${p.featured ? 'border-accent text-accent' : 'border-white/10 text-secondary'}`}>
                       {p.featured ? <Check size={12} /> : null} Featured
                     </button>
-                    <button onClick={() => setProjects(projects.filter((pr: Project) => pr.id !== p.id))} className="text-secondary hover:text-red-500 transition-colors"><Trash2 size={16} /></button>
+                    <button onClick={() => handleDeleteProject(p.id)} className="text-secondary hover:text-red-500 transition-colors"><Trash2 size={16} /></button>
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <input className="bg-white/5 border border-white/10 p-3 rounded-lg text-sm font-bold w-full" value={p.name} onChange={(e) => handleUpdateProject(p.id, { name: e.target.value })} />
-                    <input className="bg-white/5 border border-white/10 p-3 rounded-lg text-xs text-secondary w-full" value={p.tags?.join(', ') || ''} onChange={(e) => handleUpdateProject(p.id, { tags: e.target.value.split(',').map(t => t.trim()).filter(t => t !== '') })} />
+                    <div className="space-y-1">
+                      <label className="text-[10px] font-bold text-secondary uppercase tracking-widest ml-1">Project Name</label>
+                      <input className="bg-white/5 border border-white/10 p-3 rounded-lg text-sm font-bold w-full" value={p.name} onChange={(e) => handleUpdateProject(p.id, { name: e.target.value })} />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-[10px] font-bold text-secondary uppercase tracking-widest ml-1">Tags (Comma separated)</label>
+                      <input className="bg-white/5 border border-white/10 p-3 rounded-lg text-xs text-secondary w-full" value={p.tags?.join(', ') || ''} onChange={(e) => handleUpdateProject(p.id, { tags: e.target.value.split(',').map(t => t.trim()).filter(t => t !== '') })} />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-[10px] font-bold text-secondary uppercase tracking-widest ml-1">Image URL</label>
+                      <input className="bg-white/5 border border-white/10 p-3 rounded-lg text-xs text-secondary w-full" value={p.img} onChange={(e) => handleUpdateProject(p.id, { img: e.target.value })} />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-[10px] font-bold text-secondary uppercase tracking-widest ml-1">Date</label>
+                      <input className="bg-white/5 border border-white/10 p-3 rounded-lg text-xs text-secondary w-full" value={p.date} onChange={(e) => handleUpdateProject(p.id, { date: e.target.value })} />
+                    </div>
                   </div>
-                  <textarea className="w-full bg-white/5 border border-white/10 p-3 rounded-lg text-xs text-secondary" rows={2} value={p.description} onChange={(e) => handleUpdateProject(p.id, { description: e.target.value })} />
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-bold text-secondary uppercase tracking-widest ml-1">Description</label>
+                    <textarea className="w-full bg-white/5 border border-white/10 p-3 rounded-lg text-xs text-secondary" rows={2} value={p.description} onChange={(e) => handleUpdateProject(p.id, { description: e.target.value })} />
+                  </div>
                 </div>
               ))}
             </div>
@@ -160,8 +266,8 @@ const AdminDashboard = ({ projects, services, skills, setProjects, setServices, 
           <div className="space-y-4 pb-20">
             {services.map((s: Service) => (
               <div key={s.id} className="bg-surface/50 p-6 rounded-xl border border-white/5 flex gap-4 items-center">
-                <input className="flex-1 bg-white/5 border border-white/10 p-4 rounded-lg font-bold text-sm uppercase" value={s.title} onChange={(e) => setServices(services.map((ser: Service) => ser.id === s.id ? { ...ser, title: e.target.value.toUpperCase() } : ser))} />
-                <input className="flex-1 bg-white/5 border border-white/10 p-4 rounded-lg text-xs text-secondary" value={s.tags.join(', ')} onChange={(e) => setServices(services.map((ser: Service) => ser.id === s.id ? { ...ser, tags: e.target.value.split(',').map(t => t.trim()) } : ser))} />
+                <input className="flex-1 bg-white/5 border border-white/10 p-4 rounded-lg font-bold text-sm uppercase" value={s.title} onChange={(e) => setServices((prev: Service[]) => prev.map((ser: Service) => ser.id === s.id ? { ...ser, title: e.target.value.toUpperCase() } : ser))} />
+                <input className="flex-1 bg-white/5 border border-white/10 p-4 rounded-lg text-xs text-secondary" value={s.tags.join(', ')} onChange={(e) => setServices((prev: Service[]) => prev.map((ser: Service) => ser.id === s.id ? { ...ser, tags: e.target.value.split(',').map(t => t.trim()) } : ser))} />
               </div>
             ))}
           </div>
@@ -172,7 +278,7 @@ const AdminDashboard = ({ projects, services, skills, setProjects, setServices, 
               <textarea
                 className="w-full bg-white/5 border border-white/10 p-6 rounded-2xl text-lg font-display focus:border-accent outline-none min-h-[200px]"
                 value={skills.join(', ')}
-                onChange={(e) => setSkills(e.target.value.split(',').map(s => s.trim()).filter(s => s !== ''))}
+                onChange={(e) => setSkills((e.target.value || '').split(',').map(s => s.trim()).filter(s => s !== ''))}
               />
             </div>
           </div>
@@ -193,15 +299,15 @@ const App = () => {
 
   const [projects, setProjects] = useState<Project[]>(() => {
     const saved = localStorage.getItem('shivaji_v10_projects');
-    return saved ? JSON.parse(saved) : DEFAULT_PROJECTS;
+    return saved ? JSON.parse(saved) : portfolioData.projects;
   });
   const [services, setServices] = useState<Service[]>(() => {
     const saved = localStorage.getItem('shivaji_v10_services');
-    return saved ? JSON.parse(saved) : DEFAULT_SERVICES;
+    return saved ? JSON.parse(saved) : portfolioData.services;
   });
   const [skills, setSkills] = useState<string[]>(() => {
     const saved = localStorage.getItem('shivaji_v10_skills');
-    return saved ? JSON.parse(saved) : DEFAULT_SKILLS;
+    return saved ? JSON.parse(saved) : portfolioData.skills;
   });
 
   useEffect(() => { localStorage.setItem('shivaji_v10_projects', JSON.stringify(projects)); }, [projects]);
